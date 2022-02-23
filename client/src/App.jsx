@@ -1,14 +1,17 @@
 import React from 'react';
 import { Layout } from 'antd';
-import PopularMovies from './components/PopularMovies';
+import { Outlet } from 'react-router-dom';
+import MovieContextProvider from './context/MovieContext';
 
 const { Content } = Layout;
 
 const App = () => {
   return (
-    <Content>
-      <PopularMovies />
-    </Content>
+    <MovieContextProvider>
+      <Content>
+        <Outlet />
+      </Content>
+    </MovieContextProvider>
   );
 };
 

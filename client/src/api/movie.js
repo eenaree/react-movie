@@ -13,6 +13,10 @@ const movieAPI = {
     axiosInstance.get(
       `/movie/${movieId}/credits?api_key=${process.env.API_KEY}&language=ko`
     ),
+  searchMovie: query =>
+    axiosInstance.get(
+      `/search/movie?api_key=${process.env.API_KEY}&language=ko&query=${query}`
+    ),
 };
 
 export default movieAPI;
