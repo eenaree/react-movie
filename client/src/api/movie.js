@@ -1,20 +1,20 @@
-import axiosInstance from './default';
+import { movieServer } from './default';
 
 const movieAPI = {
   getPopularMovies: () =>
-    axiosInstance.get(
+    movieServer.get(
       `/movie/popular?api_key=${process.env.API_KEY}&language=ko`
     ),
   getMovie: movieId =>
-    axiosInstance.get(
+    movieServer.get(
       `/movie/${movieId}?api_key=${process.env.API_KEY}&language=ko`
     ),
   getMovieCredits: movieId =>
-    axiosInstance.get(
+    movieServer.get(
       `/movie/${movieId}/credits?api_key=${process.env.API_KEY}&language=ko`
     ),
   searchMovie: query =>
-    axiosInstance.get(
+    movieServer.get(
       `/search/movie?api_key=${process.env.API_KEY}&language=ko&query=${query}`
     ),
 };
