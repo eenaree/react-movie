@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Button } from 'antd';
 import { css } from '@emotion/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import userAPI from '../api/user';
 import useInput from '../hooks/useInput';
 import ErrorMessage from './ErrorMessage';
@@ -83,6 +83,9 @@ const LoginForm = () => {
               로그인
             </Button>
           </Form.Item>
+          <p>
+            <Link to="/register">아직 회원이 아니신가요?</Link>
+          </p>
           {errorMessage && <ErrorMessage message={errorMessage} />}
         </Form>
       </div>

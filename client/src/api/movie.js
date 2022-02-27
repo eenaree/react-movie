@@ -1,4 +1,4 @@
-import { movieServer } from './default';
+import { localServer, movieServer } from './default';
 
 const movieAPI = {
   getPopularMovies: () =>
@@ -17,6 +17,12 @@ const movieAPI = {
     movieServer.get(
       `/search/movie?api_key=${process.env.API_KEY}&language=ko&query=${query}`
     ),
+  addFavoriteMovie: movieInfo =>
+    localServer.post('/movies/addFavorite', movieInfo),
+  removeFavoriteMovie: movieInfo =>
+    localServer.post('/movies/removeFavorite', movieInfo),
+  getFavoriteMovieStatus: movieId =>
+    localServer.get('/movies/getFavoriteStatus', { params: { movieId } }),
 };
 
 export default movieAPI;

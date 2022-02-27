@@ -30,6 +30,10 @@ class User extends Model {
     );
   }
 
+  static associate(db) {
+    this.belongsToMany(db.Movie, { through: 'FavoriteMovies' });
+  }
+
   async getHashedPassword(password) {
     return await bcrypt.hash(password, 10);
   }

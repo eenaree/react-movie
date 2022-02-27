@@ -22,6 +22,8 @@ const Header = () => {
   async function logoutUser() {
     try {
       await userAPI.logout();
+      const currentUrl = window.location.href;
+      window.location.replace(currentUrl);
       sessionStorage.removeItem('user');
       setLoggedUser('');
     } catch (error) {

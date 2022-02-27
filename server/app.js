@@ -1,3 +1,4 @@
+const morgan = require('morgan');
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
@@ -33,6 +34,7 @@ app.set('port', process.env.PORT || 8080);
   }
 })();
 
+app.use(morgan('dev'));
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

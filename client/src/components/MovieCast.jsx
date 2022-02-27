@@ -6,12 +6,7 @@ import CastGridCard from './CastGridCard';
 
 const MovieCast = ({ casts }) => {
   return (
-    <div
-      css={css`
-        width: calc(100% - 100px);
-        margin: 0 50px;
-      `}
-    >
+    <div>
       <h3
         css={css`
           font-size: 20px;

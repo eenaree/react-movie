@@ -3,8 +3,7 @@ import PropTypes from 'prop-types';
 import { css } from '@emotion/react';
 
 const tableStyle = css`
-  width: calc(100% - 100px);
-  margin: 50px;
+  margin: 30px 0 50px;
   border: 1px solid #000;
   tr,
   td {

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 import movieAPI from '../api/movie';
 import { IMAGE_BASE_URL } from '../constants';
 import MovieInfo from './MovieInfo';
 import MovieCast from './MovieCast';
+import FavoriteButton from './FavoriteButton';
 
 const MovieTitle = styled.h2`
   position: relative;
@@ -68,8 +70,23 @@ const MovieDetail = () => {
           >
             {movie.title}
           </MovieTitle>
-          <MovieInfo movie={movie} />
-          {casts && <MovieCast casts={casts} />}
+          <div
+            css={css`
+              position: relative;
+              padding: 50px;
+            `}
+          >
+            <FavoriteButton
+              movie={movie}
+              css={css`
+                position: absolute;
+                top: 20px;
+                right: 50px;
+              `}
+            />
+            <MovieInfo movie={movie} />
+            {casts && <MovieCast casts={casts} />}
+          </div>
         </>
       )}
     </>
