@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Layout, Button, Space } from 'antd';
-import { Link } from 'react-router-dom';
+import { Layout, Button, Space, Menu } from 'antd';
+import { Link, useNavigate } from 'react-router-dom';
 import { css } from '@emotion/react';
 import userAPI from '../api/user';
 
@@ -18,14 +18,14 @@ const userMenuStyle = css`
 const Header = () => {
   const user = JSON.parse(sessionStorage.getItem('user'));
   const [loggedUser, setLoggedUser] = useState(user?.nickname);
+  const navigate = useNavigate();
 
   async function logoutUser() {
     try {
       await userAPI.logout();
-      const currentUrl = window.location.href;
-      window.location.replace(currentUrl);
       sessionStorage.removeItem('user');
       setLoggedUser('');
+      window.location.reload();
     } catch (error) {
       console.error(error);
     }
@@ -35,15 +35,31 @@ const Header = () => {
     logoutUser();
   }
 
+  function onClickFavorite() {
+    navigate('/movie/favorite');
+  }
+
   return (
     <Layout.Header
       css={css`
         position: relative;
+        display: flex;
       `}
     >
       <h1>
         <Link to="/">React Movie</Link>
       </h1>
+      <Menu
+        theme="dark"
+        css={css`
+          margin-left: 50px;
+          margin-top: 10px;
+        `}
+      >
+        <Menu.Item key="favorite" onClick={onClickFavorite}>
+          즐겨찾기
+        </Menu.Item>
+      </Menu>
       {loggedUser ? (
         <div css={userMenuStyle}>
           <Space align="center">

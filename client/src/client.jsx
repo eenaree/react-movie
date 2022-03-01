@@ -7,6 +7,7 @@ import SearchMovie from './components/SearchMovie';
 import Main from './components/Main';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
+import FavoriteMovies from './components/FavoriteMovies';
 import './styles/index.css';
 
 ReactDOM.render(
@@ -16,6 +17,7 @@ ReactDOM.render(
         <Route index element={<Main />} />
         <Route path="movie">
           <Route path=":id" element={<MovieDetail />} />
+          <Route path="favorite" element={<FavoriteMovies />} />
         </Route>
         <Route path="search" element={<SearchMovie />} />
       </Route>

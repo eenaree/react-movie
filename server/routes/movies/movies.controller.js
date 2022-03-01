@@ -24,6 +24,23 @@ exports.getFavoriteStatus = async (req, res) => {
   }
 };
 
+exports.getFavoriteMovies = async (req, res) => {
+  try {
+    // db에 저장된 영화가 있는가
+    // 1. 있다면 => 로그인 유저가 즐겨찾기한 영화 리스트만 추출
+    // 2. 없다면 => 저장된 영화가 없으므로 즐겨찾기한 영화도 없음
+    const savedMovies = await Movie.findAll();
+    if (!savedMovies) {
+      return res.status(400).json({ success: false, message: '즐겨찾기된 영화가 없습니다.' });
+    } 
+
+    const favoriteMovies = await res.locals.user.getMovies();
+    res.json({ success: true, favoriteMovies });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 exports.addFavorite = async (req, res) => {
   try {
     // db에 영화 정보가 저장되어 있는가
@@ -53,7 +70,8 @@ exports.removeFavorite = async (req, res) => {
     }
 
     await movie.removeUser(res.locals.user);
-    res.json({ success: true, message: '즐겨찾기 제거 성공' });
+    const favoriteMovies = await res.locals.user.getMovies();
+    res.json({ success: true, message: '즐겨찾기 제거 성공', favoriteMovies });
   } catch (error) {
     console.error(error);
   }
