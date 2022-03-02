@@ -1,18 +1,21 @@
-const { Movie } = require('../../models');
+const { Movie, User } = require('../../models');
 
 exports.getFavoriteStatus = async (req, res) => {
   try {
-    // db에 해당 영화 정보가 있는가
-    // 1. 있다면 => 즐겨찾기 여부 확인 
-    // 2. 없다면 => 영화 정보가 저장되어 있지 않으므로 즐겨찾기 여부도 확인할 수 없음
+    // db에 사용자 정보가 담긴 해당 영화 정보가 있는가
+    // 1. 있다면 => 로그인 유저 정보로 즐겨찾기 여부 확인 
+    // 2. 없다면 => 사용자 정보를 포함하지 않으므로 즐겨찾기 상태 아님
     console.log(req.query);
-    const savedMovie = await Movie.findOne({ where: { movieId: req.query.movieId }});
-    if (!savedMovie) {
+    const movieWithUserInfo = await Movie.findOne({
+      where: { movieId: req.query.movieId },
+      include: { model: User, required: true }
+    });
+    if (!movieWithUserInfo) {
       return res.json({ success: false, message: '즐겨찾기 되지 않은 영화입니다.' });
     }
 
-    const favoredUsers = await savedMovie.getUsers();
-    favoredUsers.map(user => {
+    const favoredUsers = movieWithUserInfo.Users;
+    favoredUsers.forEach(user => {
       if (user.id === res.locals.user.id) {
         res.json({ success: true, message: '즐겨찾기된 영화입니다.' });
       } else {
@@ -26,15 +29,13 @@ exports.getFavoriteStatus = async (req, res) => {
 
 exports.getFavoriteMovies = async (req, res) => {
   try {
-    // db에 저장된 영화가 있는가
+    // 로그인 유저가 즐겨찾기한 영화가 있는가
     // 1. 있다면 => 로그인 유저가 즐겨찾기한 영화 리스트만 추출
-    // 2. 없다면 => 저장된 영화가 없으므로 즐겨찾기한 영화도 없음
-    const savedMovies = await Movie.findAll();
-    if (!savedMovies) {
-      return res.status(400).json({ success: false, message: '즐겨찾기된 영화가 없습니다.' });
-    } 
-
+    // 2. 없다면 => 즐겨찾기된 영화 없음 
     const favoriteMovies = await res.locals.user.getMovies();
+    if (!favoriteMovies) {
+      return res.json({ success: false, message: '즐겨찾기된 영화가 없습니다.' });
+    }
     res.json({ success: true, favoriteMovies });
   } catch (error) {
     console.error(error);

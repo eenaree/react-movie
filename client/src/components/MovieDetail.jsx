@@ -33,6 +33,7 @@ const MovieDetail = () => {
   const params = useParams();
   const [movie, setMovie] = useState(null);
   const [casts, setCasts] = useState(null);
+  const [isFavored, setIsFavored] = useState(false);
 
   useEffect(() => {
     async function getMovie() {
@@ -54,8 +55,18 @@ const MovieDetail = () => {
       }
     }
 
+    async function getFavoriteMovieStatus() {
+      try {
+        const { data } = await movieAPI.getFavoriteMovieStatus(params.id);
+        setIsFavored(data.success);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     getMovie();
     getMovieCredits();
+    getFavoriteMovieStatus();
   }, [params.id]);
 
   return (
@@ -78,6 +89,8 @@ const MovieDetail = () => {
           >
             <FavoriteButton
               movie={movie}
+              isFavored={isFavored}
+              setIsFavored={setIsFavored}
               css={css`
                 position: absolute;
                 top: 20px;
