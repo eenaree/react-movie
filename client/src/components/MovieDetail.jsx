@@ -7,6 +7,7 @@ import { IMAGE_BASE_URL } from '../constants';
 import MovieInfo from './MovieInfo';
 import MovieCast from './MovieCast';
 import FavoriteButton from './FavoriteButton';
+import MovieComments from './MovieComments';
 
 const MovieTitle = styled.h2`
   position: relative;
@@ -48,8 +49,8 @@ const MovieDetail = () => {
     async function getMovieCredits() {
       try {
         const { data } = await movieAPI.getMovieCredits(params.id);
-        console.log(data.cast);
-        setCasts(data.cast);
+        const mainCasts = data.cast.slice(0, 8);
+        setCasts(mainCasts);
       } catch (error) {
         console.error(error);
       }
@@ -99,6 +100,7 @@ const MovieDetail = () => {
             />
             <MovieInfo movie={movie} />
             {casts && <MovieCast casts={casts} />}
+            <MovieComments movie={movie} />
           </div>
         </>
       )}

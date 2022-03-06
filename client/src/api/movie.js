@@ -24,6 +24,11 @@ const movieAPI = {
   getFavoriteMovieStatus: movieId =>
     localServer.get('/movies/getFavoriteStatus', { params: { movieId } }),
   getFavoriteMovies: () => localServer.get('/movies/getFavoriteMovies'),
+  getComments: movieId =>
+    localServer.get('/movies/getComments', { params: { movieId } }),
+  addComment: comment => localServer.post('/movies/addComment', comment),
+  removeComment: commentId =>
+    localServer.post('/movies/removeComment', commentId),
 };
 
 export default movieAPI;

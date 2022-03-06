@@ -32,6 +32,7 @@ class User extends Model {
 
   static associate(db) {
     this.belongsToMany(db.Movie, { through: 'FavoriteMovies' });
+    this.hasMany(db.Comment, { foreignKey: 'commenter' });
   }
 
   async getHashedPassword(password) {

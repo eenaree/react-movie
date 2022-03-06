@@ -34,6 +34,7 @@ class Movie extends Model {
 
   static associate(db) {
     this.belongsToMany(db.User, { through: 'FavoriteMovies' });
+    this.belongsToMany(db.Comment, { through: 'MovieComments' });
   }
 }
 

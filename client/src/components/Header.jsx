@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import { Layout, Button, Space, Menu } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { css } from '@emotion/react';
 import userAPI from '../api/user';
+import { UserContext } from '../context/UserContext';
 
 const userMenuStyle = css`
   position: absolute;
@@ -16,8 +17,7 @@ const userMenuStyle = css`
 `;
 
 const Header = () => {
-  const user = JSON.parse(sessionStorage.getItem('user'));
-  const [loggedUser, setLoggedUser] = useState(user?.nickname);
+  const { loggedUser, setLoggedUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   async function logoutUser() {
@@ -68,7 +68,7 @@ const Header = () => {
                 color: #fff;
               `}
             >
-              {loggedUser}님
+              {loggedUser.nickname}님
             </strong>
             <Button type="link" onClick={onClickLogout}>
               로그아웃
