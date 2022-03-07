@@ -33,8 +33,6 @@ const MovieTitle = styled.h2`
 const MovieDetail = () => {
   const params = useParams();
   const [movie, setMovie] = useState(null);
-  const [casts, setCasts] = useState(null);
-  const [isFavored, setIsFavored] = useState(false);
 
   useEffect(() => {
     async function getMovie() {
@@ -46,28 +44,7 @@ const MovieDetail = () => {
       }
     }
 
-    async function getMovieCredits() {
-      try {
-        const { data } = await movieAPI.getMovieCredits(params.id);
-        const mainCasts = data.cast.slice(0, 8);
-        setCasts(mainCasts);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    async function getFavoriteMovieStatus() {
-      try {
-        const { data } = await movieAPI.getFavoriteMovieStatus(params.id);
-        setIsFavored(data.success);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
     getMovie();
-    getMovieCredits();
-    getFavoriteMovieStatus();
   }, [params.id]);
 
   return (
@@ -90,8 +67,6 @@ const MovieDetail = () => {
           >
             <FavoriteButton
               movie={movie}
-              isFavored={isFavored}
-              setIsFavored={setIsFavored}
               css={css`
                 position: absolute;
                 top: 20px;
@@ -99,7 +74,7 @@ const MovieDetail = () => {
               `}
             />
             <MovieInfo movie={movie} />
-            {casts && <MovieCast casts={casts} />}
+            <MovieCast />
             <MovieComments movie={movie} />
           </div>
         </>

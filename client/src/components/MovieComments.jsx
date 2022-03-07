@@ -28,7 +28,7 @@ const MovieComments = ({ movie }) => {
       case 'ADD_COMMENT':
         return {
           ...state,
-          comments: state.comments.concat(action.comment),
+          comments: [action.comment, ...state.comments],
         };
       case 'REMOVE_COMMENT':
         return {

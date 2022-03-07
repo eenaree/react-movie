@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from 'antd';
 import PropTypes from 'prop-types';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import movieAPI from '../api/movie';
 
-const FavoriteButton = ({ movie, isFavored, setIsFavored, ...props }) => {
+const FavoriteButton = ({ movie, ...props }) => {
+  const params = useParams();
   const navigate = useNavigate();
   const movieInfo = {
     movieId: movie.id,
@@ -12,6 +13,7 @@ const FavoriteButton = ({ movie, isFavored, setIsFavored, ...props }) => {
     release_date: movie.release_date,
     runtime: movie.runtime,
   };
+  const [isFavored, setIsFavored] = useState(false);
 
   async function addFavoriteMovie() {
     try {
@@ -39,6 +41,19 @@ const FavoriteButton = ({ movie, isFavored, setIsFavored, ...props }) => {
     isFavored ? removeFavoriteMovie() : addFavoriteMovie();
   }
 
+  useEffect(() => {
+    async function getFavoriteMovieStatus() {
+      try {
+        const { data } = await movieAPI.getFavoriteMovieStatus(params.id);
+        setIsFavored(data.success);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    getFavoriteMovieStatus();
+  }, [params.id]);
+
   return (
     <Button onClick={onClick} {...props}>
       {isFavored ? '즐겨찾기 추가됨' : '즐겨찾기 추가'}
@@ -48,8 +63,6 @@ const FavoriteButton = ({ movie, isFavored, setIsFavored, ...props }) => {
 
 FavoriteButton.propTypes = {
   movie: PropTypes.object.isRequired,
-  isFavored: PropTypes.bool.isRequired,
-  setIsFavored: PropTypes.func.isRequired,
 };
 
 export default FavoriteButton;

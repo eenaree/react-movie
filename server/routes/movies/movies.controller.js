@@ -1,4 +1,4 @@
-const { Movie, User, Comment } = require('../../models');
+const { Movie, User, Comment, Sequelize } = require('../../models');
 
 exports.getFavoriteStatus = async (req, res) => {
   try {
@@ -84,6 +84,11 @@ exports.getComments = async (req, res) => {
     // 1. 있다면 => 사용자 정보와 함께 가져오기 (비밀번호 제외)
     // 2. 없다면 => 가져올 댓글 없음
     const commentsWithUserInfoAboutMovie = await Comment.findAll({
+      attributes: {
+        include: [
+          [Sequelize.fn('DATE_FORMAT', Sequelize.col('Comment.createdAt'), '%Y-%m-%d %H:%i:%s'), 'createdAt'],
+        ],
+      },
       include: [
         {
           model: Movie,
@@ -95,7 +100,8 @@ exports.getComments = async (req, res) => {
           required: true,
           attributes: { exclude: ['password'] }
         },
-      ]
+      ],
+      order: [['createdAt', 'DESC']],
     });
     if (!commentsWithUserInfoAboutMovie) {
       return res.json({ success: false, message: '해당 영화에 대한 댓글이 없습니다.' });
