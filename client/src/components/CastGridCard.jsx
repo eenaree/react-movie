@@ -35,7 +35,15 @@ const CastGridCard = ({ cast }) => {
         <p>
           <strong>{original_name}</strong>
         </p>
-        <p>{character}</p>
+        <p
+          css={css`
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          `}
+        >
+          {character}
+        </p>
       </div>
     </GridCard>
   );

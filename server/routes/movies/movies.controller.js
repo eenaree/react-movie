@@ -163,16 +163,76 @@ exports.addComment = async (req, res) => {
 exports.removeComment = async (req, res) => {
   try {
     // db에 클라이언트로부터 전달받은 댓글 id와 일치하는 댓글이 있는가
-    // 1. 있다면 => 해당 댓글과 영화의 관계 제거, 해당 댓글 삭제
+    // 1. 있다면 => 해당 댓글과 영화의 관계 제거, 댓글에 좋아요한 사용자 제거, 해당 댓글 삭제
     // 2. 없다면 => 댓글이 존재하지 않으므로 댓글 삭제 불가능. 에러 메시지 전달
     const comment = await Comment.findByPk(req.body.commentId);
     if (!comment) {
       return res.status(400).json({ success: false, message: '삭제하려는 댓글이 존재하지 않습니다.' });
     }
 
+    await comment.removeLikers();
     await comment.removeMovies();
     await Comment.destroy({ where: { id: req.body.commentId } });
     res.json({ success: true, message: '댓글 삭제 성공' });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+exports.likeComment = async (req, res) => {
+  try {
+    // db에 클라이언트로부터 전달받은 댓글 id와 일치하는 댓글 찾기
+    // 1. 댓글이 있다면 => 댓글에 좋아요 표시한 사용자 정보 관계 추가
+    // 2. 없다면 => 댓글이 없으므로 좋아요 추가 불가능. 에러메세지 전달
+    const comment = await Comment.findByPk(req.body.commentId);
+    if (!comment) {
+      return res.status(400).json({ success: false, message: '해당 댓글이 존재하지 않습니다.' });
+    }
+
+    await comment.addLiker(res.locals.user.id);
+    return res.json({ success: true, message: '댓글 좋아요 추가 성공' });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+exports.unlikeComment = async (req, res) => {
+  try {
+    // 클라이언트로 전달받은 댓글 id와 일치하는 댓글 db에서 찾기
+    // 1. 댓글이 있다면 => 댓글과 좋아요 표시한 사용자 정보 관계 제거
+    // 2. 없다면 => 댓글이 없으므로 좋아요 제거 불가능. 에러메세지 전달
+    const comment = await Comment.findByPk(req.body.commentId);
+    if (!comment) {
+      return res.status(400).json({ success: false, message: '해당 댓글이 존재하지 않습니다.' });
+    }
+
+    await comment.removeLiker(res.locals.user.id);
+    return res.json({ success: true, message: '댓글 좋아요 취소 성공' });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+exports.getCommentLikeStatus = async (req, res) => {
+  try {
+    // db에 좋아요 여부 포함한 해당 댓글 가져오기
+    // 1. 좋아요 없음 => 아무도 좋아요 누르지 않았으므로 가져올 좋아요 상태 없음
+    // 2. 좋아요 있음 => 로그인 유저의 좋아요 여부 체크 => 있으면 true, 없으면 false
+    const commentWithLikers = await Comment.findByPk(req.query.commentId, {
+      include: 'likers',
+    });
+
+    if (!commentWithLikers.likers.length) {
+      return res.json({ success: false, message: '해당 댓글을 사용자가 좋아하지 않습니다.' });
+    }
+
+    commentWithLikers.likers.forEach(liker => {
+      if (liker.id === res.locals.user.id) {
+        res.json({ success: true, message: '해당 댓글을 사용자가 좋아합니다.' });
+      } else {
+        res.json({ success: false, message: '해당 댓글을 사용자가 좋아하지 않습니다.' });
+      }
+    });
   } catch (error) {
     console.error(error);
   }

@@ -23,6 +23,7 @@ class Comment extends Model {
   static associate(db) {
     this.belongsToMany(db.Movie, { through: 'MovieComments' });
     this.belongsTo(db.User, { foreignKey: 'commenter' });
+    this.belongsToMany(db.User, { through: 'LikeComments', as: 'likers' });
   }
 }
 

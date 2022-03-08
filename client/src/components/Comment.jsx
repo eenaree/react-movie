@@ -4,6 +4,7 @@ import { css } from '@emotion/react';
 import { Button } from 'antd';
 import movieAPI from '../api/movie';
 import { UserContext } from '../context/UserContext';
+import LikeButton from './LikeButton';
 
 const Comment = ({ comment, dispatch }) => {
   const { loggedUser } = useContext(UserContext);
@@ -57,6 +58,7 @@ const Comment = ({ comment, dispatch }) => {
           삭제
         </Button>
       )}
+      <LikeButton comment={comment} />
     </div>
   );
 };
