@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useReducer, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { css } from '@emotion/react';
 import { Input, Button } from 'antd';
@@ -8,6 +8,7 @@ import movieAPI from '../api/movie';
 
 const MovieComments = ({ movie }) => {
   const params = useParams();
+  const commentInputRef = useRef();
   const [comment, setComment] = useState('');
   const onChangeComment = e => setComment(e.target.value);
   const movieInfo = {
@@ -44,6 +45,8 @@ const MovieComments = ({ movie }) => {
       const { data } = await movieAPI.addComment(movieInfoWithComment);
       if (data.success) {
         dispatch({ type: 'ADD_COMMENT', comment: data.comment });
+        setComment('');
+        commentInputRef.current.focus();
       }
     } catch (error) {
       console.error(error);
@@ -91,6 +94,7 @@ const MovieComments = ({ movie }) => {
         `}
       >
         <Input
+          ref={commentInputRef}
           value={comment}
           onChange={onChangeComment}
           placeholder="댓글을 입력해주세요"

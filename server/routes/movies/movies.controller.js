@@ -48,14 +48,12 @@ exports.addFavorite = async (req, res) => {
     // 1. 있다면 => 그 정보에 즐겨찾기만 추가
     // 2. 없다면 => 영화 정보 새로 저장, 즐겨찾기 추가
     const { movieId, title, release_date, runtime } = req.body;
-    const savedMovie = await Movie.findOne({ where: { movieId }});
-    if (savedMovie) {
-      await savedMovie.addUser(res.locals.user);
-      return res.json({ success: true, message: '즐겨찾기 추가 성공' });
-    }
+    const [movie] = await Movie.findOrCreate({
+      where: { movieId },
+      defaults: { movieId, title, release_date, runtime },
+    });
 
-    const newSavedMovie = await Movie.create({ movieId, title, release_date, runtime });
-    await newSavedMovie.addUser(res.locals.user);
+    await movie.addUser(res.locals.user);
     res.json({ success: true, message: '즐겨찾기 추가 성공' });
   } catch (error) {
     console.error(error);
@@ -119,39 +117,22 @@ exports.addComment = async (req, res) => {
     // 1. 있다면 => 저장된 영화 정보에 댓글, 사용자 정보 추가
     // 2. 없다면 => 해당 영화 저장 및 댓글, 사용자 정보 추가
     const { movieId, title, runtime, release_date, comment } = req.body;
-    const savedMovie = await Movie.findOne({ where: { movieId } });
-    if (savedMovie) {
-      const newComment = await Comment.create({
-        commenter: res.locals.user.id,
-        comment,
-      });
-      await newComment.addMovie(savedMovie);
-      
-      const newCommentWithUserInfo = await Comment.findOne({
-        where: { id: newComment.id },
-        include: {
-          model: User, 
-          required: true, 
-          attributes: { exclude: ['password'] }
-        }
-      });
-      return res.json({ success: true, comment: newCommentWithUserInfo });
-    } 
+    const [movie] = await Movie.findOrCreate({
+      where: { movieId },
+      defaults: { movieId, title, runtime, release_date },
+    });
 
     const newComment = await Comment.create({
       commenter: res.locals.user.id,
-      comment,
-      Movies: [{ movieId, title, runtime, release_date }],
-    }, {
-      include: [Movie]
+      comment
     });
+    await newComment.addMovie(movie);
 
-    const newCommentWithUserInfo = await Comment.findOne({
-      where: { id: newComment.id },
+    const newCommentWithUserInfo = await Comment.findByPk(newComment.id, {
       include: {
-        model: User, 
-        required: true, 
-        attributes: { exclude: ['password'] }
+        model: User,
+        required: true,
+        attributes: { exclude: ['password'] },
       }
     });
     res.json({ success: true, comment: newCommentWithUserInfo });
@@ -233,6 +214,22 @@ exports.getCommentLikeStatus = async (req, res) => {
         res.json({ success: false, message: '해당 댓글을 사용자가 좋아하지 않습니다.' });
       }
     });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+exports.getCommentLikers = async (req, res) => {
+  try {
+    const commentWithLikers = await Comment.findByPk(req.query.commentId, {
+      include: 'likers',
+    });
+
+    if (!commentWithLikers.likers.length) {
+      return res.json({ success: true, likerCount: 0 });
+    }
+
+    res.json({ success: true, likerCount: commentWithLikers.likers.length });
   } catch (error) {
     console.error(error);
   }

@@ -6,6 +6,7 @@ router.get('/getFavoriteMovies', isLoggedIn, controller.getFavoriteMovies);
 router.get('/getFavoriteStatus', isLoggedIn, controller.getFavoriteStatus);
 router.get('/getComments', controller.getComments);
 router.get('/getCommentLikeStatus', isLoggedIn, controller.getCommentLikeStatus);
+router.get('/getCommentLikers', controller.getCommentLikers);
 router.post('/addComment', isLoggedIn, controller.addComment);
 router.post('/removeComment', isLoggedIn, controller.removeComment);
 router.post('/addFavorite', isLoggedIn, controller.addFavorite);

@@ -5,11 +5,15 @@ import movieAPI from '../api/movie';
 
 const LikeButton = ({ comment, ...props }) => {
   const [isLiked, setIsLiked] = useState(false);
+  const [likerCount, setLikerCount] = useState(0);
 
   async function likeComment() {
     try {
       const { data } = await movieAPI.likeComment({ commentId: comment.id });
-      data.success && setIsLiked(true);
+      if (data.success) {
+        setIsLiked(true);
+        setLikerCount(prevCount => prevCount + 1);
+      }
     } catch (error) {
       console.error(error);
       if (error.response) {
@@ -21,7 +25,10 @@ const LikeButton = ({ comment, ...props }) => {
   async function unlikeComment() {
     try {
       const { data } = await movieAPI.unlikeComment({ commentId: comment.id });
-      data.success && setIsLiked(false);
+      if (data.success) {
+        setIsLiked(false);
+        setLikerCount(prevCount => prevCount - 1);
+      }
     } catch (error) {
       console.error(error);
       if (error.response) {
@@ -44,12 +51,22 @@ const LikeButton = ({ comment, ...props }) => {
       }
     }
 
+    async function getCommentLikers() {
+      try {
+        const { data } = await movieAPI.getCommentLikers(comment.id);
+        data.success && setLikerCount(data.likerCount);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     getCommentLikeStatus();
+    getCommentLikers();
   }, [comment.id]);
 
   return (
     <Button {...props} onClick={onClick}>
-      {isLiked ? '좋아요 취소' : '좋아요'}
+      {isLiked ? `좋아요 취소 ${likerCount}` : `좋아요 ${likerCount}`}
     </Button>
   );
 };

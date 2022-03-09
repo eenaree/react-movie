@@ -58,7 +58,14 @@ const Comment = ({ comment, dispatch }) => {
           삭제
         </Button>
       )}
-      <LikeButton comment={comment} />
+      <LikeButton
+        comment={comment}
+        css={css`
+          position: absolute;
+          right: 0;
+          bottom: 0;
+        `}
+      />
     </div>
   );
 };
