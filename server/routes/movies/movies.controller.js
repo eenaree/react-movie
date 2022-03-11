@@ -79,7 +79,7 @@ exports.removeFavorite = async (req, res) => {
 exports.getComments = async (req, res) => {
   try {
     // db에서 해당 영화 정보가 저장되어 있고, 댓글이 존재하는가
-    // 1. 있다면 => 사용자 정보와 함께 가져오기 (비밀번호 제외)
+    // 1. 있다면 => 사용자 정보와 함께 가져오기 (비밀번호 제외), 대댓글 정보도 댓글과 똑같은 형태로 가져오기
     // 2. 없다면 => 가져올 댓글 없음
     const commentsWithUserInfoAboutMovie = await Comment.findAll({
       attributes: {
@@ -98,6 +98,20 @@ exports.getComments = async (req, res) => {
           required: true,
           attributes: { exclude: ['password'] }
         },
+        {
+          model: Comment,
+          as: 'replies',
+          attributes: {
+            include: [
+              [Sequelize.fn('DATE_FORMAT', Sequelize.col('Comment.createdAt'), '%Y-%m-%d %H:%i:%s'), 'createdAt'],
+            ],
+          },
+          include: {
+            model: User,
+            required: true,
+            attributes: { exclude: ['password'] },
+          },
+        },
       ],
       order: [['createdAt', 'DESC']],
     });
@@ -114,7 +128,7 @@ exports.getComments = async (req, res) => {
 exports.addComment = async (req, res) => {
   try {
     // db에 해당 영화 정보가 저장되어 있는가
-    // 1. 있다면 => 저장된 영화 정보에 댓글, 사용자 정보 추가
+    // 1. 있다면 => 저장된 영화 정보에 댓글, 사용자 정보 추가 => 대댓글과 사용자 정보가 포함된 댓글 가져오기
     // 2. 없다면 => 해당 영화 저장 및 댓글, 사용자 정보 추가
     const { movieId, title, runtime, release_date, comment } = req.body;
     const [movie] = await Movie.findOrCreate({
@@ -129,11 +143,22 @@ exports.addComment = async (req, res) => {
     await newComment.addMovie(movie);
 
     const newCommentWithUserInfo = await Comment.findByPk(newComment.id, {
-      include: {
-        model: User,
-        required: true,
-        attributes: { exclude: ['password'] },
-      }
+      attributes: {
+        include: [
+          [Sequelize.fn('DATE_FORMAT', Sequelize.col('Comment.createdAt'), '%Y-%m-%d %H:%i:%s'), 'createdAt'],
+        ],
+      },
+      include: [
+        {
+          model: User,
+          required: true,
+          attributes: { exclude: ['password'] },
+        },
+        {
+          model: Comment,
+          as: 'replies',
+        },
+      ],
     });
     res.json({ success: true, comment: newCommentWithUserInfo });
   } catch (error) {
@@ -144,15 +169,22 @@ exports.addComment = async (req, res) => {
 exports.removeComment = async (req, res) => {
   try {
     // db에 클라이언트로부터 전달받은 댓글 id와 일치하는 댓글이 있는가
-    // 1. 있다면 => 해당 댓글과 영화의 관계 제거, 댓글에 좋아요한 사용자 제거, 해당 댓글 삭제
+    // 1. 있다면 => 해당 댓글 및 댓글에 포함된 대댓글 모두 삭제
     // 2. 없다면 => 댓글이 존재하지 않으므로 댓글 삭제 불가능. 에러 메시지 전달
-    const comment = await Comment.findByPk(req.body.commentId);
+    const comment = await Comment.findByPk(req.body.commentId, {
+      include: 'replies',
+    });
     if (!comment) {
       return res.status(400).json({ success: false, message: '삭제하려는 댓글이 존재하지 않습니다.' });
     }
 
-    await comment.removeLikers();
-    await comment.removeMovies();
+    if (comment.replies.length) {
+      const replyCommentIds = [];
+      comment.replies.forEach(reply => {
+        replyCommentIds.push(reply.id);
+      });
+      await Comment.destroy({ where: { id: replyCommentIds }});
+    }
     await Comment.destroy({ where: { id: req.body.commentId } });
     res.json({ success: true, message: '댓글 삭제 성공' });
   } catch (error) {
@@ -230,6 +262,57 @@ exports.getCommentLikers = async (req, res) => {
     }
 
     res.json({ success: true, likerCount: commentWithLikers.likers.length });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+exports.addReplyComment = async (req, res) => {
+  // db에 해당 댓글이 있는가
+  // 1. 있다면 => 대댓글 생성 및 기존 댓글과의 관계 추가 => 사용자 정보를 포함하는 대댓글 가져오기
+  // 2. 없다면 => 댓글이 존재하지 않으므로 대댓글 작성 불가능. 에러메세지 전달
+  try {
+    const comment = await Comment.findByPk(req.body.commentId);
+    if (!comment) {
+      return res.status(400).json({ success: false, message: '해당 댓글이 존재하지 않습니다.' });
+    }
+  
+    const newReplyComment = await Comment.create({
+      commenter: res.locals.user.id,
+      comment: req.body.replyComment,
+    });
+    await newReplyComment.addOriginalComment(req.body.commentId);
+
+    const newReplyCommentWithUserInfo = await Comment.findByPk(newReplyComment.id, {
+      attributes: {
+        include: [
+          [Sequelize.fn('DATE_FORMAT', Sequelize.col('Comment.createdAt'), '%Y-%m-%d %H:%i:%s'), 'createdAt'],
+        ],
+      },
+      include: {
+        model: User,
+        required: true,
+        attributes: { exclude: ['password'] },
+      },
+    });
+    res.json({ success: true, replyComment: newReplyCommentWithUserInfo });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+exports.removeReplyComment = async (req, res) => {
+  // db에 해당 대댓글이 있는가
+  // 1. 있다면 => 대댓글 삭제
+  // 2. 없다면 => 삭제할 대댓글이 존재하지 않으므로 에러메세지 전달
+  try {
+    const replyComment = await Comment.findByPk(req.body.replyCommentId);
+    if (!replyComment) {
+      return res.status(400).json({ success: false, message: '해당 댓글이 존재하지 않습니다.' });
+    }
+
+    await Comment.destroy({ where: { id: req.body.replyCommentId }});
+    res.json({ success: true, message: '대댓글 삭제 성공' });
   } catch (error) {
     console.error(error);
   }

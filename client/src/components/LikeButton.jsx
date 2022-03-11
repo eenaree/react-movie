@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from 'antd';
 import PropTypes from 'prop-types';
 import movieAPI from '../api/movie';
+import { css } from '@emotion/react';
 
 const LikeButton = ({ comment, ...props }) => {
   const [isLiked, setIsLiked] = useState(false);
@@ -65,8 +66,18 @@ const LikeButton = ({ comment, ...props }) => {
   }, [comment.id]);
 
   return (
-    <Button {...props} onClick={onClick}>
-      {isLiked ? `좋아요 취소 ${likerCount}` : `좋아요 ${likerCount}`}
+    <Button
+      {...props}
+      onClick={onClick}
+      css={
+        isLiked &&
+        css`
+          border: 1px solid #1890ff;
+          color: #1890ff;
+        `
+      }
+    >
+      좋아요{likerCount}
     </Button>
   );
 };

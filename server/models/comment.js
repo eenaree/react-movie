@@ -24,6 +24,8 @@ class Comment extends Model {
     this.belongsToMany(db.Movie, { through: 'MovieComments' });
     this.belongsTo(db.User, { foreignKey: 'commenter' });
     this.belongsToMany(db.User, { through: 'LikeComments', as: 'likers' });
+    this.belongsToMany(db.Comment, { through: 'ReplyComments', as: 'replies', foreignKey: 'replyId' });
+    this.belongsToMany(db.Comment, { through: 'ReplyComments', as: 'originalComments', foreignKey: 'originalCommentId' });
   }
 }
 

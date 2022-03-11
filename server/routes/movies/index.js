@@ -13,5 +13,7 @@ router.post('/addFavorite', isLoggedIn, controller.addFavorite);
 router.post('/removeFavorite', isLoggedIn, controller.removeFavorite);
 router.post('/likeComment', isLoggedIn, controller.likeComment);
 router.post('/unlikeComment', isLoggedIn, controller.unlikeComment);
+router.post('/addReplyComment', isLoggedIn, controller.addReplyComment);
+router.post('/removeReplyComment', isLoggedIn, controller.removeReplyComment);
 
 module.exports = router;

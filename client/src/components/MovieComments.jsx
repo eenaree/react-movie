@@ -1,16 +1,13 @@
-import React, { useEffect, useReducer, useRef, useState } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { css } from '@emotion/react';
-import { Input, Button } from 'antd';
 import { useParams } from 'react-router-dom';
-import Comment from './Comment';
+import CommentForm from './CommentForm';
+import CommentList from './CommentList';
 import movieAPI from '../api/movie';
 
 const MovieComments = ({ movie }) => {
   const params = useParams();
-  const commentInputRef = useRef();
-  const [comment, setComment] = useState('');
-  const onChangeComment = e => setComment(e.target.value);
   const movieInfo = {
     movieId: movie.id,
     title: movie.title,
@@ -39,14 +36,13 @@ const MovieComments = ({ movie }) => {
     }
   }
 
-  async function addComment() {
+  async function addComment(comment) {
     try {
       const movieInfoWithComment = { ...movieInfo, comment };
       const { data } = await movieAPI.addComment(movieInfoWithComment);
       if (data.success) {
         dispatch({ type: 'ADD_COMMENT', comment: data.comment });
-        setComment('');
-        commentInputRef.current.focus();
+        return true;
       }
     } catch (error) {
       console.error(error);
@@ -56,9 +52,18 @@ const MovieComments = ({ movie }) => {
     }
   }
 
-  function onSubmit(e) {
-    e.preventDefault();
-    addComment();
+  async function removeComment(commentId) {
+    try {
+      const { data } = await movieAPI.removeComment({ commentId });
+      if (data.success) {
+        dispatch({ type: 'REMOVE_COMMENT', id: commentId });
+      }
+    } catch (error) {
+      console.error(error);
+      if (error.response) {
+        alert(error.response.data.message);
+      }
+    }
   }
 
   useEffect(() => {
@@ -87,36 +92,9 @@ const MovieComments = ({ movie }) => {
       >
         {comments.length > 0 ? `${comments.length}개의 댓글` : '댓글'}
       </h3>
-      <form
-        onSubmit={onSubmit}
-        css={css`
-          position: relative;
-        `}
-      >
-        <Input
-          ref={commentInputRef}
-          value={comment}
-          onChange={onChangeComment}
-          placeholder="댓글을 입력해주세요"
-        />
-        <Button
-          type="primary"
-          htmlType="submit"
-          css={css`
-            position: absolute;
-            top: 0;
-            right: 0;
-          `}
-        >
-          등록
-        </Button>
-      </form>
+      <CommentForm addComment={addComment} />
       {comments.length > 0 && (
-        <div>
-          {comments.map(comment => (
-            <Comment key={comment.id} comment={comment} dispatch={dispatch} />
-          ))}
-        </div>
+        <CommentList comments={comments} removeComment={removeComment} />
       )}
     </div>
   );

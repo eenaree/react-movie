@@ -2,34 +2,21 @@ import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { css } from '@emotion/react';
 import { Button } from 'antd';
-import movieAPI from '../api/movie';
 import { UserContext } from '../context/UserContext';
 import LikeButton from './LikeButton';
 
-const Comment = ({ comment, dispatch }) => {
+const Comment = ({ comment, removeComment }) => {
   const { loggedUser } = useContext(UserContext);
 
-  async function removeComment() {
-    try {
-      const { data } = await movieAPI.removeComment({ commentId: comment.id });
-      if (data.success) {
-        dispatch({ type: 'REMOVE_COMMENT', id: comment.id });
-      }
-    } catch (error) {
-      console.error(error);
-      if (error.response) {
-        alert(error.response.data.message);
-      }
-    }
+  function removeHandler() {
+    removeComment(comment.id);
   }
 
   return (
     <div
       css={css`
         position: relative;
-        margin-top: 15px;
         padding: 20px;
-        border: 1px solid #eee;
         .nickname {
           font-weight: 700;
         }
@@ -46,7 +33,7 @@ const Comment = ({ comment, dispatch }) => {
       <p className="comment">{comment.comment}</p>
       {loggedUser?.nickname === comment.User.nickname && (
         <Button
-          onClick={removeComment}
+          onClick={removeHandler}
           type="primary"
           danger
           css={css`
@@ -72,7 +59,7 @@ const Comment = ({ comment, dispatch }) => {
 
 Comment.propTypes = {
   comment: PropTypes.object.isRequired,
-  dispatch: PropTypes.func.isRequired,
+  removeComment: PropTypes.func.isRequired,
 };
 
 export default Comment;

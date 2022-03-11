@@ -36,6 +36,10 @@ const movieAPI = {
     localServer.get('/movies/getCommentLikeStatus', { params: { commentId } }),
   getCommentLikers: commentId =>
     localServer.get('/movies/getCommentLikers', { params: { commentId } }),
+  addReplyComment: replyCommentInfo =>
+    localServer.post('/movies/addReplyComment', replyCommentInfo),
+  removeReplyComment: replyCommentId =>
+    localServer.post('/movies/removeReplyComment', replyCommentId),
 };
 
 export default movieAPI;
