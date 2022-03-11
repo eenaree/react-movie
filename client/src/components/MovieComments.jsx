@@ -38,6 +38,9 @@ const MovieComments = ({ movie }) => {
 
   async function addComment(comment) {
     try {
+      if (!comment) {
+        return alert('입력한 내용이 없습니다.');
+      }
       const movieInfoWithComment = { ...movieInfo, comment };
       const { data } = await movieAPI.addComment(movieInfoWithComment);
       if (data.success) {

@@ -35,6 +35,9 @@ const ReplyCommentList = ({ replies, commentId }) => {
 
   async function addReplyComment(replyComment) {
     try {
+      if (!replyComment) {
+        return alert('입력한 내용이 없습니다.');
+      }
       const replyCommentInfo = { commentId, replyComment };
       const { data } = await movieAPI.addReplyComment(replyCommentInfo);
       if (data.success) {
