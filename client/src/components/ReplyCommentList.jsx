@@ -2,9 +2,9 @@ import React, { useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'antd';
 import { css } from '@emotion/react';
-import Comment from './Comment';
-import CommentForm from './CommentForm';
 import movieAPI from '../api/movie';
+import CommentList from './CommentList';
+import CommentForm from './CommentForm';
 
 const ReplyCommentList = ({ replies, commentId }) => {
   const [{ replyComments }, dispatch] = useReducer(replyCommentReducer, {
@@ -86,22 +86,17 @@ const ReplyCommentList = ({ replies, commentId }) => {
             padding: 10px 20px;
           `}
         >
-          {replyComments.map(replyComment => (
-            <div
-              key={replyComment.id}
-              css={css`
-                border-bottom: 1px solid #ddd;
-                padding-bottom: 10px;
-                margin-bottom: 10px;
-              `}
-            >
-              <Comment
-                comment={replyComment}
-                removeComment={removeReplyComment}
-              />
-            </div>
-          ))}
-          <CommentForm addComment={addReplyComment} />
+          <CommentList
+            comments={replyComments}
+            removeComment={removeReplyComment}
+          />
+          <div
+            css={css`
+              margin: 10px 0;
+            `}
+          >
+            <CommentForm addComment={addReplyComment} />
+          </div>
         </div>
       )}
     </>

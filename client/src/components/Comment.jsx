@@ -16,7 +16,7 @@ const Comment = ({ comment, removeComment }) => {
     <div
       css={css`
         position: relative;
-        padding: 20px;
+        padding-bottom: 20px;
         .nickname {
           font-weight: 700;
         }
@@ -50,7 +50,7 @@ const Comment = ({ comment, removeComment }) => {
         css={css`
           position: absolute;
           right: 0;
-          bottom: 0;
+          bottom: 10px;
         `}
       />
     </div>

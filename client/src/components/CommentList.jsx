@@ -11,12 +11,17 @@ const CommentList = ({ comments, removeComment }) => {
         <div
           key={comment.id}
           css={css`
-            border: 1px solid #eee;
+            border-bottom: 1px solid #ddd;
             margin-top: 15px;
           `}
         >
           <Comment comment={comment} removeComment={removeComment} />
-          <ReplyCommentList replies={comment.replies} commentId={comment.id} />
+          {comment.replies && (
+            <ReplyCommentList
+              replies={comment.replies}
+              commentId={comment.id}
+            />
+          )}
         </div>
       ))}
     </div>
