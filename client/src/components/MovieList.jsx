@@ -1,16 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Row, Col } from 'antd';
-import { css } from '@emotion/react';
 import MovieGridCard from './MovieGridCard';
 
 const MovieList = ({ movies }) => {
   return (
-    <div
-      css={css`
-        margin: 50px;
-      `}
-    >
+    <div>
       <Row gutter={[24, 24]}>
         {movies.map(movie => (
           <Col xs={24} md={8} lg={6} key={movie.id}>

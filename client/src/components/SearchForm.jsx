@@ -3,6 +3,8 @@ import { Input, Button } from 'antd';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import movieAPI from '../api/movie';
 
 const SearchButton = styled(Button)`
   position: absolute;
@@ -10,12 +12,23 @@ const SearchButton = styled(Button)`
   right: 50px;
 `;
 
-const SearchForm = () => {
+const SearchForm = ({ setMovies }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const onChangeSearchQuery = e => setSearchQuery(e.target.value);
   const inputRef = useRef();
   const searchParams = new URLSearchParams();
   const navigate = useNavigate();
+
+  async function searchMovie(keyword) {
+    try {
+      const { data } = await movieAPI.searchMovie(keyword);
+      !data.results.length ? setMovies([]) : setMovies(data.results);
+      setSearchQuery('');
+      navigate(`/search?${searchParams}`);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   function onSubmit(e) {
     e.preventDefault();
@@ -24,8 +37,7 @@ const SearchForm = () => {
       return inputRef.current.focus();
     }
     searchParams.set('keyword', searchQuery);
-    navigate(`/search?${searchParams}`);
-    setSearchQuery('');
+    searchMovie(searchQuery);
   }
 
   return (
@@ -49,6 +61,10 @@ const SearchForm = () => {
       </form>
     </>
   );
+};
+
+SearchForm.propTypes = {
+  setMovies: PropTypes.func.isRequired,
 };
 
 export default SearchForm;

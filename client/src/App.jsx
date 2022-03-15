@@ -4,7 +4,6 @@ import AppLayout from './components/AppLayout';
 import Main from './components/Main';
 import MovieDetail from './components/MovieDetail';
 import FavoriteMovies from './components/FavoriteMovies';
-import SearchMovie from './components/SearchMovie';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import Authentication from './components/Authentication';
@@ -25,7 +24,7 @@ const App = () => {
             }
           />
         </Route>
-        <Route path="search" element={<SearchMovie />} />
+        <Route path="search" element={<Main />} />
         <Route
           path="login"
           element={

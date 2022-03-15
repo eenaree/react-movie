@@ -1,34 +1,24 @@
-import React, { useContext, useEffect } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
+import { useLocation } from 'react-router-dom';
 import { css } from '@emotion/react';
 import MovieList from './MovieList';
-import { MovieContext } from '../context/MovieContext';
-import movieAPI from '../api/movie';
 
-const SearchResult = () => {
-  const searchParams = new URLSearchParams(window.location.search);
+const SearchResult = ({ movies }) => {
+  const { search } = useLocation();
+  const searchParams = new URLSearchParams(search);
   const keyword = searchParams.get('keyword');
-  const { movies, setMovies } = useContext(MovieContext);
-
-  useEffect(() => {
-    async function searchMovie() {
-      try {
-        const { data } = await movieAPI.searchMovie(keyword);
-        !data.results.length ? setMovies([]) : setMovies(data.results);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    searchMovie();
-  }, [searchParams, keyword]);
 
   return (
     <>
       {keyword && (
-        <div>
+        <div
+          css={css`
+            padding: 0 50px 50px 50px;
+          `}
+        >
           <p
             css={css`
-              padding-top: 50px;
               text-align: center;
               font-size: 20px;
             `}
@@ -50,6 +40,10 @@ const SearchResult = () => {
       )}
     </>
   );
+};
+
+SearchResult.propTypes = {
+  movies: PropTypes.array.isRequired,
 };
 
 export default SearchResult;

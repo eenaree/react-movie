@@ -1,9 +1,11 @@
 import { localServer, movieServer } from './default';
 
 const movieAPI = {
-  getPopularMovies: () =>
+  getPopularMovies: page =>
     movieServer.get(
-      `/movie/popular?api_key=${process.env.API_KEY}&language=ko`
+      `/movie/popular?api_key=${process.env.API_KEY}&language=ko&page=${
+        page || 1
+      }`
     ),
   getMovie: movieId =>
     movieServer.get(
