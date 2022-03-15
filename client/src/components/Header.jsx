@@ -1,9 +1,9 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Layout, Button, Space, Menu } from 'antd';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { css } from '@emotion/react';
 import userAPI from '../api/user';
-import { UserContext } from '../context/UserContext';
+import useAuth from '../hooks/useAuth';
 
 const userMenuStyle = css`
   position: absolute;
@@ -17,15 +17,18 @@ const userMenuStyle = css`
 `;
 
 const Header = () => {
-  const { loggedUser, setLoggedUser } = useContext(UserContext);
+  const { loggedUser, setLoggedUser } = useAuth();
   const navigate = useNavigate();
+  const { pathname, search } = useLocation();
 
   async function logoutUser() {
     try {
-      await userAPI.logout();
-      sessionStorage.removeItem('user');
-      setLoggedUser('');
-      window.location.reload();
+      const { data } = await userAPI.logout();
+      if (data.success) {
+        navigate('/');
+        sessionStorage.removeItem('user');
+        setLoggedUser('');
+      }
     } catch (error) {
       console.error(error);
     }
@@ -78,7 +81,9 @@ const Header = () => {
       ) : (
         <ul css={userMenuStyle}>
           <li>
-            <Link to="/login">로그인</Link>
+            <Link to="/login" state={{ from: pathname + search }}>
+              로그인
+            </Link>
           </li>
           <li>
             <Link to="/register">회원가입</Link>

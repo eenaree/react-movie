@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Button } from 'antd';
+import { Form, Input, Button, message } from 'antd';
 import { css } from '@emotion/react';
 import { useNavigate } from 'react-router-dom';
 import userAPI from '../api/user';
@@ -11,12 +11,14 @@ const RegisterForm = () => {
   const initialState = { email: '', nickname: '', password: '' };
   const [userInfo, onChangeUserInfo] = useInput(initialState);
   const [errorMessage, setErrorMessage] = useState('');
+  let timeout;
 
   async function registerUser(userInfo) {
     try {
       const { data } = await userAPI.register(userInfo);
-      sessionStorage.setItem('user', JSON.stringify(data.user));
-      navigate('/');
+      if (data) {
+        processRegisterResult(data.success);
+      }
     } catch (error) {
       console.error(error);
       if (error.response) {
@@ -33,9 +35,41 @@ const RegisterForm = () => {
     registerUser(userInfo);
   }
 
+  function processRegisterResult(result) {
+    const key = 'register result message';
+
+    function processRegisterSuccess(key) {
+      message.success({
+        content: '회원가입 성공',
+        key,
+        duration: 2,
+      });
+      navigate('/');
+    }
+
+    function processRegisterFailure(key) {
+      message.error({
+        content: '회원가입 실패',
+        key,
+        duration: 2,
+      });
+    }
+
+    message.loading({ content: '회원가입 처리중...', key });
+
+    if (result) {
+      timeout = setTimeout(processRegisterSuccess, 1000, key);
+    } else {
+      timeout = setTimeout(processRegisterFailure, 1000, key);
+    }
+  }
+
   useEffect(() => {
     setErrorMessage('');
-  }, [userInfo]);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [userInfo, timeout]);
 
   return (
     <div

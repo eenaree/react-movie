@@ -1,22 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Button } from 'antd';
 import { css } from '@emotion/react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import userAPI from '../api/user';
 import useInput from '../hooks/useInput';
+import useAuth from '../hooks/useAuth';
 import ErrorMessage from './ErrorMessage';
 
 const LoginForm = () => {
+  const location = useLocation();
   const navigate = useNavigate();
   const initialState = { email: '', password: '' };
   const [userInfo, onChangeUserInfo] = useInput(initialState);
   const [errorMessage, setErrorMessage] = useState(null);
+  const { setLoggedUser } = useAuth();
+  const from = (location.state && location.state.from) || '/';
 
   async function loginUser(userInfo) {
     try {
       const { data } = await userAPI.login(userInfo);
-      sessionStorage.setItem('user', JSON.stringify(data.user));
-      navigate('/');
+      if (data.success) {
+        navigate(from, { replace: true });
+        sessionStorage.setItem('user', JSON.stringify(data.user));
+        setLoggedUser(data.user);
+      }
     } catch (error) {
       console.error(error);
       if (error.response) {
