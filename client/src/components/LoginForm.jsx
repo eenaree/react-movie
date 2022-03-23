@@ -20,9 +20,9 @@ const LoginForm = () => {
     try {
       const { data } = await userAPI.login(userInfo);
       if (data.success) {
-        navigate(from, { replace: true });
-        sessionStorage.setItem('user', JSON.stringify(data.user));
         setLoggedUser(data.user);
+        sessionStorage.setItem('user', JSON.stringify(data.user));
+        navigate(from, { replace: true });
       }
     } catch (error) {
       console.error(error);
